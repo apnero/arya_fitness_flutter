@@ -5,9 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:arya_fitness/model/user_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'dart:io';
 
 final auth = FirebaseAuth.instance;
 final googleSignIn = new GoogleSignIn();
@@ -90,7 +87,7 @@ getUserRecord(BuildContext context) async {
   if (userRecord.data != null) {
     admin = userRecord.data['admin'];
   }
-  return;
+  return null;
 }
 
 class AryaFitness extends StatelessWidget {
@@ -206,21 +203,23 @@ class _HomePageState extends State<HomePage> {
             appBar: new AppBar(
                 // Title
                 title: Text("Hello ${googleSignIn.currentUser.displayName}")),
-            floatingActionButton: admin == false ? null : new FloatingActionButton.extended(
-              key: new ValueKey<Key>(new Key('1')),
-              tooltip: 'Show explanation',
-              backgroundColor: Colors.blue,
-              icon: new Icon(Icons.message), //page.fabIcon,
-              label: Text('Send Notification'),
-              onPressed: _showDialog,
-            ),
+            floatingActionButton: admin == false
+                ? null
+                : new FloatingActionButton.extended(
+                    key: new ValueKey<Key>(new Key('1')),
+                    tooltip: 'Show explanation',
+                    backgroundColor: Colors.blue,
+                    icon: new Icon(Icons.message), //page.fabIcon,
+                    label: Text('Send Notification'),
+                    onPressed: _showDialog,
+                  ),
 
             // Body
             body: new StreamBuilder(
                 stream: Firestore.instance
                     .collection('Notifications')
                     .limit(5)
-                    .orderBy('time')
+                    .orderBy('time',descending: false)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return const Text('Loading...');
@@ -259,46 +258,43 @@ class _HomePageState extends State<HomePage> {
   }
 
   _showDialog() async {
-    await showDialog<String>(
-      context: context,
-      child: new AlertDialog(
-        contentPadding: const EdgeInsets.all(16.0),
-        content: new Column(
-          children: <Widget>[
-            new Expanded(
-                child: new TextField(
-              controller: titleController,
-              maxLines: 1,
-              autofocus: true,
-              decoration: new InputDecoration(
-                icon: new Icon(Icons.title),
-              ),
-            )),
-            new Expanded(
-                child: new TextField(
-              controller: messageController,
-              maxLines: 3,
-              autofocus: true,
-              decoration: new InputDecoration(
-                icon: new Icon(Icons.message),
-              ),
-            ))
-          ],
-        ),
-        actions: <Widget>[
-          new FlatButton(
-              child: const Text('CANCEL'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
-          new FlatButton(
-              child: const Text('SEND'),
-              onPressed: () {
-                sendNotification();
-                Navigator.pop(context);
-              })
+    new AlertDialog(
+      contentPadding: const EdgeInsets.all(16.0),
+      content: new Column(
+        children: <Widget>[
+          new Expanded(
+              child: new TextField(
+            controller: titleController,
+            maxLines: 1,
+            autofocus: true,
+            decoration: new InputDecoration(
+              icon: new Icon(Icons.title),
+            ),
+          )),
+          new Expanded(
+              child: new TextField(
+            controller: messageController,
+            maxLines: 3,
+            autofocus: true,
+            decoration: new InputDecoration(
+              icon: new Icon(Icons.message),
+            ),
+          ))
         ],
       ),
+      actions: <Widget>[
+        new FlatButton(
+            child: const Text('CANCEL'),
+            onPressed: () {
+              Navigator.pop(context);
+            }),
+        new FlatButton(
+            child: const Text('SEND'),
+            onPressed: () {
+              sendNotification();
+              Navigator.pop(context);
+            })
+      ],
     );
   }
 
@@ -311,7 +307,9 @@ class _HomePageState extends State<HomePage> {
 
   void silentLogin(BuildContext context) async {
     await _silentLogin(context);
-    setState(() {triedSilentLogin = true;});
+    setState(() {
+      triedSilentLogin = true;
+    });
   }
 }
 
