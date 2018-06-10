@@ -5,11 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:arya_fitness/model/user_model.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:duration/duration.dart';
+import 'package:arya_fitness/ui/send_text.dart';
 
 final auth = FirebaseAuth.instance;
 final googleSignIn = new GoogleSignIn();
 final ref = Firestore.instance.collection('Users');
-final refNotifications = Firestore.instance.collection('Notifications');
+
 
 User currentUserModel;
 String pushToken = '';
@@ -102,6 +104,10 @@ class AryaFitness extends StatelessWidget {
         accentColor: Colors.cyan[600],
       ),
       home: new HomePage(title: 'Arya Fitness'),
+      routes: <String, WidgetBuilder>{
+        // Set named routes
+        "/send_text": (BuildContext context) => new SendText(),
+      },
     );
   }
 }
@@ -120,27 +126,9 @@ class _HomePageState extends State<HomePage> {
 //  int _page = 0;
   bool triedSilentLogin = false;
   FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
-  final titleController = new TextEditingController();
-  final messageController = new TextEditingController();
 
-  Future<Null> sendNotification() async {
-    final DocumentReference document = refNotifications.document();
-    document.setData(<String, dynamic>{
-      'title': titleController.text,
-      'message': messageController.text,
-      'time': new DateTime.now().millisecondsSinceEpoch,
-    });
-    messageController.clear();
-    titleController.clear();
-  }
 
-  @override
-  void dispose() {
-    // Clean up the controller when the Widget is disposed
-    titleController.dispose();
-    messageController.dispose();
-    super.dispose();
-  }
+
 
   @override
   void initState() {
@@ -201,8 +189,8 @@ class _HomePageState extends State<HomePage> {
         : new Scaffold(
             // Appbar
             appBar: new AppBar(
-                // Title
-                title: Text("Hello ${googleSignIn.currentUser.displayName}")),
+                centerTitle: true,
+                title: Text("Welcome To Arya Fitness")),
             floatingActionButton: admin == false
                 ? null
                 : new FloatingActionButton.extended(
@@ -211,22 +199,22 @@ class _HomePageState extends State<HomePage> {
                     backgroundColor: Colors.blue,
                     icon: new Icon(Icons.message), //page.fabIcon,
                     label: Text('Send Notification'),
-                    onPressed: _showDialog,
+                    onPressed:() => Navigator.of(context).pushNamed('/send_text'),
                   ),
 
             // Body
             body: new StreamBuilder(
                 stream: Firestore.instance
                     .collection('Notifications')
+                    .orderBy('time', descending: true)
                     .limit(5)
-                    .orderBy('time',descending: false)
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) return const Text('Loading...');
                   return new ListView.builder(
                     itemCount: snapshot.data.documents.length,
                     padding: const EdgeInsets.all(15.0),
-                    itemExtent: 120.0,
+                    itemExtent: 145.0,
                     itemBuilder: (context, index) =>
                         _buildListItem(context, snapshot.data.documents[index]),
                   );
@@ -254,49 +242,60 @@ class _HomePageState extends State<HomePage> {
       const Divider(
         height: 5.0,
       ),
+      new Center(
+        child: new Text("Sent " + printDuration(
+                DateTime.now().difference(
+                    DateTime.fromMillisecondsSinceEpoch(document['time'])),
+                tersity: DurationTersity.hour) +
+            ' ago.'),
+      ),
+      const Divider(
+        color: Colors.white70,
+        height: 20.0,
+      ),
     ]);
   }
-
-  _showDialog() async {
-    new AlertDialog(
-      contentPadding: const EdgeInsets.all(16.0),
-      content: new Column(
-        children: <Widget>[
-          new Expanded(
-              child: new TextField(
-            controller: titleController,
-            maxLines: 1,
-            autofocus: true,
-            decoration: new InputDecoration(
-              icon: new Icon(Icons.title),
-            ),
-          )),
-          new Expanded(
-              child: new TextField(
-            controller: messageController,
-            maxLines: 3,
-            autofocus: true,
-            decoration: new InputDecoration(
-              icon: new Icon(Icons.message),
-            ),
-          ))
-        ],
-      ),
-      actions: <Widget>[
-        new FlatButton(
-            child: const Text('CANCEL'),
-            onPressed: () {
-              Navigator.pop(context);
-            }),
-        new FlatButton(
-            child: const Text('SEND'),
-            onPressed: () {
-              sendNotification();
-              Navigator.pop(context);
-            })
-      ],
-    );
-  }
+//
+//  _showDialog() async {
+//    new AlertDialog(
+//      contentPadding: const EdgeInsets.all(16.0),
+//      content: new Column(
+//        children: <Widget>[
+//          new Expanded(
+//              child: new TextField(
+//            controller: titleController,
+//            maxLines: 1,
+//            autofocus: true,
+//            decoration: new InputDecoration(
+//              icon: new Icon(Icons.title),
+//            ),
+//          )),
+//          new Expanded(
+//              child: new TextField(
+//            controller: messageController,
+//            maxLines: 3,
+//            autofocus: true,
+//            decoration: new InputDecoration(
+//              icon: new Icon(Icons.message),
+//            ),
+//          ))
+//        ],
+//      ),
+//      actions: <Widget>[
+//        new FlatButton(
+//            child: const Text('CANCEL'),
+//            onPressed: () {
+//              Navigator.pop(context);
+//            }),
+//        new FlatButton(
+//            child: const Text('SEND'),
+//            onPressed: () {
+//              sendNotification();
+//              Navigator.pop(context);
+//            })
+//      ],
+//    );
+//  }
 
   void login() async {
     await _ensureLoggedIn(context);
