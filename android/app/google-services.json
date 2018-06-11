@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "516727995796-33t45dfkl257803vdd0dcv605cskmpue.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nerodigitalmarketing.aryafitness",
+            "certificate_hash": "55adcdc1df3492eb5e158e20bea871bcb179ffb3"
+          }
+        },
+        {
           "client_id": "516727995796-pvcaa3q7g25rllm9c2pu13gama2t03n0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -46,6 +54,13 @@
             {
               "client_id": "516727995796-hnh7o709p2p55bvmiuttkq3r6q4t2rub.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "516727995796-bhr1r6j8qvvp7n5sr52s7vg4mkar9sfq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nerodigitalmarketing.aryaFitness"
+              }
             }
           ]
         },
