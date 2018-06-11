@@ -213,7 +213,7 @@ class _HomePageState extends State<HomePage> {
                   if (!snapshot.hasData) return const Text('Loading...');
                   return new ListView.builder(
                     itemCount: snapshot.data.documents.length,
-                    padding: const EdgeInsets.all(15.0),
+                    padding: const EdgeInsets.all(14.0),
                     itemExtent: 145.0,
                     itemBuilder: (context, index) =>
                         _buildListItem(context, snapshot.data.documents[index]),
