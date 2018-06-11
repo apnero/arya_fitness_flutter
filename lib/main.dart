@@ -251,7 +251,7 @@ class _HomePageState extends State<HomePage> {
       ),
       const Divider(
         color: Colors.white70,
-        height: 20.0,
+        height: 19.0,
       ),
     ]);
   }
